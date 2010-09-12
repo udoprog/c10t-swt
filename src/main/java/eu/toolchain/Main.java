@@ -3,6 +3,7 @@ package eu.toolchain;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -39,6 +40,8 @@ public class Main {
 	public static final String TITLE = "c10t Graphical Interface";
 	public static final String INITIAL_PROGRESS_LABEL = "Press 'Render' to render image";
 	
+	public static final String NAME = "c10t";
+	
 	private static Display display;
 	private static Shell shell;
 	private static Text worldPath;
@@ -48,16 +51,39 @@ public class Main {
 	private static Label progressBarLabel;
 	private static Spinner coreSpinner;
 	
-	public static List<String> buildCommandList() {
-		List<String> command = new ArrayList<String>();
-		
+	public static String findCommand(String name) throws CommandNotFoundException {
 		String platform = SWT.getPlatform();
 		
-		if (platform.equals("win32")) {
-			command.add("c10t.exe");
-		} else {
-			command.add("/usr/local/bin/c10t");
+		String PATH = System.getenv("PATH");
+		
+		if (StringUtils.isEmpty(PATH)) {
+			throw new CommandNotFoundException();
 		}
+		
+		String paths[];
+		
+		if (platform.equals("win32")) {
+			name += ".exe";
+			paths = PATH.split(";");
+		} else {
+			paths = PATH.split(":");
+		}
+		
+		for (String p : paths) {
+			File fp = new File(p, name);
+			
+			if (fp.isFile() && fp.canExecute()) {
+				return fp.getAbsolutePath();
+			}
+		}
+		
+		throw new CommandNotFoundException();
+	}
+	
+	public static List<String> buildCommandList() throws CommandNotFoundException {
+		List<String> command = new ArrayList<String>();
+		
+		command.add(findCommand(NAME));
 		
 		// command for binary progress
 		command.add("-x");
@@ -259,7 +285,22 @@ public class Main {
 				public void widgetSelected(SelectionEvent event) {
 					Runtime r = Runtime.getRuntime();
 					
-					List<String> cmd = buildCommandList();
+					List<String> cmd;
+					
+					try {
+						cmd = buildCommandList();
+					} catch(CommandNotFoundException e) {
+						MessageBox messageBox = new MessageBox(shell, SWT.ERROR);
+						
+						messageBox.setMessage(
+								"Command cannot be find anywhere in your path when looking for " + NAME + "\n" +
+								"Make sure that the command exists somewhere in your PATH"
+						);
+						
+						messageBox.open();
+						return;
+					}
+					
 					System.out.println("executing command: " + cmd);
 					
 					try {
