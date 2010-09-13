@@ -1,18 +1,9 @@
 package eu.toolchain;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -110,7 +101,7 @@ public class Main {
 		Display display = new Display();
 		final Shell shell = new Shell(display);
 		shell.setText(TITLE);
-		shell.setMinimumSize(400, 400);
+		shell.setMinimumSize(600, 400);
 		
 		final C10tGraphicalInterface gui = new C10tGraphicalInterface(display, shell);
 		final DetachedProcess detachedProcess = new C10tDetachedProcess(gui);
@@ -120,6 +111,10 @@ public class Main {
 		
 		GridLayout gridLayout = new GridLayout();
 		gridLayout.numColumns = 3;
+		gridLayout.marginBottom = 10;
+		gridLayout.marginTop = 10;
+		gridLayout.marginLeft = 10;
+		gridLayout.marginRight = 10;
 		
 		shell.setLayout (gridLayout);
 		shell.pack ();

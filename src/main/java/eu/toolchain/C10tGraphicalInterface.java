@@ -30,9 +30,12 @@ public class C10tGraphicalInterface {
 	private ProgressBar progressBar;
 	private Label progressBarLabel;
 	private Spinner coreSpinner;
+	private Spinner bottom;
+	private Spinner top;
 	private Button renderbutton;
 	private Button flip;
 	private Button inverse;
+	private Button cavemode;
 	
 	public void addRenderButtonListener(SelectionListener listener) {
 		renderbutton.addSelectionListener(listener);
@@ -96,6 +99,12 @@ public class C10tGraphicalInterface {
 			command.add("-o");
 			command.add(outputFile.getText());
 		}
+
+		command.add("-b");
+		command.add(Integer.toString(bottom.getSelection()));
+
+		command.add("-t");
+		command.add(Integer.toString(top.getSelection()));
 		
 		if (flip.getSelection()) {
 			command.add("-f");
@@ -103,6 +112,10 @@ public class C10tGraphicalInterface {
 		
 		if (inverse.getSelection()) {
 			command.add("-r");
+		}
+		
+		if (cavemode.getSelection()) {
+			command.add("-c");
 		}
 		
 		command.add("-m");
@@ -200,10 +213,10 @@ public class C10tGraphicalInterface {
 			new Label(shell, SWT.NONE).setText("Threads: ");
 			
 			coreSpinner = new Spinner(shell, SWT.BORDER);
-			coreSpinner.setLayoutData(normal2);
 			coreSpinner.setMaximum(24);
 			coreSpinner.setMinimum(1);
 			coreSpinner.setSelection(1);
+			new Label(shell, SWT.NONE);
 		}
 		
 		{
@@ -211,7 +224,7 @@ public class C10tGraphicalInterface {
 			
 			flip = new Button(shell, SWT.CHECK);
 			flip.setText("Flip 90 degrees CCW");
-			flip.setLayoutData(normal2);
+			flip.setLayoutData(fill2);
 		}
 		
 		{
@@ -219,7 +232,42 @@ public class C10tGraphicalInterface {
 			
 			inverse = new Button(shell, SWT.CHECK);
 			inverse.setText("Flip 180 degrees CCW");
-			inverse.setLayoutData(normal2);
+			inverse.setLayoutData(fill2);
+		}
+		
+		{
+			new Label(shell, SWT.NONE);
+			
+			cavemode = new Button(shell, SWT.CHECK);
+			cavemode.setText("Cave-mode");
+			cavemode.setLayoutData(fill2);
+		}
+		
+		{
+			new Label(shell, SWT.NONE).setText("Limits (bottom - top): ");
+			
+			bottom = new Spinner(shell, SWT.BORDER);
+			bottom.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent arg0) {
+					if (bottom.getSelection() >= top.getSelection()) {
+						bottom.setSelection(top.getSelection() - 1);
+					}
+				}
+			});
+			bottom.setMinimum(0);
+			bottom.setMaximum(0x7f);
+			
+			top = new Spinner(shell, SWT.BORDER);
+			top.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent arg0) {
+					if (top.getSelection() <= bottom.getSelection()) {
+						top.setSelection(bottom.getSelection() + 1);
+					}
+				}
+			});
+			top.setMinimum(0);
+			top.setMaximum(0x7f);
+			top.setSelection(0x7f);
 		}
 		
 		{

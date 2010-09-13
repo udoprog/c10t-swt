@@ -90,6 +90,8 @@ public class CommandExecutioner {
 			arguments.add(a);
 		}
 		
+		System.out.println("Executing command: " + StringUtils.join(arguments, " "));
+		
 		try {
 			return Runtime.getRuntime().exec(arguments.toArray(new String[arguments.size()]));
 		} catch(IOException e) {
