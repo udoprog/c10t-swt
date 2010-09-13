@@ -36,6 +36,7 @@ public class C10tGraphicalInterface {
 	private Button flip;
 	private Button inverse;
 	private Button cavemode;
+	private Button nightmode;
 	
 	public void addRenderButtonListener(SelectionListener listener) {
 		renderbutton.addSelectionListener(listener);
@@ -116,6 +117,10 @@ public class C10tGraphicalInterface {
 		
 		if (cavemode.getSelection()) {
 			command.add("-c");
+		}
+		
+		if (nightmode.getSelection()) {
+			command.add("-n");
 		}
 		
 		command.add("-m");
@@ -241,6 +246,14 @@ public class C10tGraphicalInterface {
 			cavemode = new Button(shell, SWT.CHECK);
 			cavemode.setText("Cave-mode");
 			cavemode.setLayoutData(fill2);
+		}
+		
+		{
+			new Label(shell, SWT.NONE);
+			
+			nightmode = new Button(shell, SWT.CHECK);
+			nightmode.setText("Night-mode");
+			nightmode.setLayoutData(fill2);
 		}
 		
 		{
