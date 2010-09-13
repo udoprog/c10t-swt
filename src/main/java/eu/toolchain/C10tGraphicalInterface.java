@@ -198,12 +198,6 @@ public class C10tGraphicalInterface {
 		}
 		
 		{
-			Label optionsLabel = new Label(shell, SWT.NONE);
-			optionsLabel.setText("Options: ");
-			optionsLabel.setLayoutData(fill3);
-		}
-		
-		{
 			new Label(shell, SWT.NONE).setText("Mode: ");
 			
 			mode = new Combo(shell, SWT.DROP_DOWN);
