@@ -83,6 +83,8 @@ public class C10tDetachedProcess implements DetachedProcess {
 				  
 				  gui.updateProgressBar(readPercentage(is));
 				  break;
+			default:
+				throw new DetachedProcessException("Bad command byte: " + b);
 			}
         }
         
