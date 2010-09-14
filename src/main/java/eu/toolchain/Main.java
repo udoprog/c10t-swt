@@ -93,12 +93,13 @@ public class Main {
         MessageBox messageBox = new MessageBox(shell, SWT.ERROR);
         messageBox.setMessage(stringBuffer.toString());
         messageBox.open();
+        gui.enableRenderButton();
       }
     }
   }
   
   public static void main (String [] args) {
-    Display display = new Display();
+    Display display = Display.getDefault();
     final Shell shell = new Shell(display);
     shell.setText(TITLE);
     shell.setMinimumSize(600, 400);
