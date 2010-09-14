@@ -1,4 +1,4 @@
-package eu.toolchain;
+package eu.toolchain.c10t;
 
 public class CommandExecutionThread extends Thread {
   private DetachedProcess detachedThread;

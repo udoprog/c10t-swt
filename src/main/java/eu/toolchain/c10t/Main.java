@@ -1,4 +1,4 @@
-package eu.toolchain;
+package eu.toolchain.c10t;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -37,25 +37,24 @@ public class Main {
         @Override
         public void onException(DetachedProcessException e) {
           final Writer result = new StringWriter();
-            final PrintWriter printWriter = new PrintWriter(result);
-            
-            e.printStackTrace(printWriter);
-          
-            gui.enableRenderButton();
-            gui.updateProgressBar(0);
-            gui.updateProgressLabel("Failed to execute command!");
-            
+          final PrintWriter printWriter = new PrintWriter(result);
+
+          e.printStackTrace(printWriter);
+
+          gui.enableRenderButton();
+          gui.updateProgressBar(0);
+          gui.updateProgressLabel("Failed to execute command!");
+
           gui.asyncExec(new Runnable() {
-            
             @Override
             public void run() {
               MessageBox messageBox = new MessageBox(shell, SWT.ERROR);
-              
+
               messageBox.setMessage(
-                "Got exception while trying to execute command:\n" + 
+                "Got exception while trying to execute command:\n" +
                 result.toString()
               );
-              
+
               messageBox.open();
             }
           });
@@ -112,10 +111,10 @@ public class Main {
     
     GridLayout gridLayout = new GridLayout();
     gridLayout.numColumns = 3;
-    gridLayout.marginBottom = 10;
-    gridLayout.marginTop = 10;
-    gridLayout.marginLeft = 10;
-    gridLayout.marginRight = 10;
+    gridLayout.marginBottom = 20;
+    gridLayout.marginTop = 20;
+    gridLayout.marginLeft = 20;
+    gridLayout.marginRight = 20;
     
     shell.setLayout (gridLayout);
     shell.pack ();

@@ -123,7 +123,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
           <archive>
             <manifest>
               <addClasspath>true</addClasspath>
-              <mainClass>eu.toolchain.Main</mainClass>
+              <mainClass>eu.toolchain.c10t.Main</mainClass>
             </manifest>
           </archive>
           <descriptorRefs>

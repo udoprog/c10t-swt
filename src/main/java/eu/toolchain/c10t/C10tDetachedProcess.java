@@ -1,4 +1,4 @@
-package eu.toolchain;
+package eu.toolchain.c10t;
 
 import java.io.BufferedReader;
 import java.io.IOException;

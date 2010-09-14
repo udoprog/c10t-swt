@@ -1,4 +1,4 @@
-package eu.toolchain;
+package eu.toolchain.c10t;
 
 public class CommandNotFoundException extends Exception {
   public CommandNotFoundException() {
