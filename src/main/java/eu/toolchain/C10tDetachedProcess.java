@@ -47,53 +47,53 @@ public class C10tDetachedProcess implements DetachedProcess {
   public void run(Process p) throws DetachedProcessException {
         InputStream is = p.getInputStream();
         
-      int b;
+    int b;
       
-      int stage = 0x0;
+    int stage = 0x0;
       
-        while (true) {
-          if ((b = read(is)) == -1) {
-            break;
-          }
-          
+    while (true) {
+      if ((b = read(is)) == -1) {
+        break;
+      }
+      
       switch(b) {
       case ERROR_BYTE:
         throw new DetachedProcessException(readErrorMessage(is));
       case RENDER_BYTE:
-          if (stage != RENDER_BYTE) {
-            gui.updateProgressLabel("Rendering Parts...");
-            stage = RENDER_BYTE;
-          }
-          
-          gui.updateProgressBar(readPercentage(is));
-          break;
+        if (stage != RENDER_BYTE) {
+          gui.updateProgressLabel("Rendering Parts...");
+          stage = RENDER_BYTE;
+        }
+        
+        gui.updateProgressBar(readPercentage(is));
+        break;
       case COMP_BYTE:
-          if (stage != COMP_BYTE) {
-            gui.updateProgressLabel("Compositioning Image...");
-            stage = COMP_BYTE;
-          }
-          
-          gui.updateProgressBar(readPercentage(is));
-          break;
+        if (stage != COMP_BYTE) {
+          gui.updateProgressLabel("Compositioning Image...");
+          stage = COMP_BYTE;
+        }
+        
+        gui.updateProgressBar(readPercentage(is));
+        break;
       case IMAGE_BYTE:
-          if (stage != IMAGE_BYTE) {
-            gui.updateProgressLabel("Saving Image...");
-            stage = IMAGE_BYTE;
-          }
-          
-          gui.updateProgressBar(readPercentage(is));
-          break;
+        if (stage != IMAGE_BYTE) {
+          gui.updateProgressLabel("Saving Image...");
+          stage = IMAGE_BYTE;
+        }
+        
+        gui.updateProgressBar(readPercentage(is));
+        break;
       default:
         throw new DetachedProcessException("Bad command byte: " + b);
       }
-        }
-        
-        try {
-          if (p.waitFor() != 0) {
-            throw new DetachedProcessException("Command returned non-zero status");
-          }
-        } catch(InterruptedException e) {
-          throw new DetachedProcessException(e);
-        }
+    }
+    
+    try {
+      if (p.waitFor() != 0) {
+        throw new DetachedProcessException("Command returned non-zero status");
+      }
+    } catch(InterruptedException e) {
+      throw new DetachedProcessException(e);
+    }
   }
 }
