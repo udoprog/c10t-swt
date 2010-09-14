@@ -1,8 +1,9 @@
+#!/bin/sh
 # this is an example installation of a maven repo file
 mvn install:install-file \
-  -Dfile=src/jar/swt-3.6-gtk-linux-x86.jar\
+  -Dfile=swt.jar\
   -DgroupId=org.eclipse.swt\
-  -DartifactId=swt-gtk-linux\
+  -DartifactId=swt-carbon-macosx\
   -Dversion=3.6\
   -Dclassifier=x86\
   -Dpackaging=jar\
