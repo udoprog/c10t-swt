@@ -8,6 +8,7 @@ import java.io.Writer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
@@ -101,7 +102,6 @@ public class Main {
     Display display = Display.getDefault();
     final Shell shell = new Shell(display);
     shell.setText(TITLE);
-    shell.setMinimumSize(600, 400);
     
     final C10tGraphicalInterface gui = new C10tGraphicalInterface(display, shell);
     final DetachedProcess detachedProcess = new C10tDetachedProcess(gui);
@@ -111,19 +111,25 @@ public class Main {
     
     GridLayout gridLayout = new GridLayout();
     gridLayout.numColumns = 3;
-    gridLayout.marginBottom = 20;
-    gridLayout.marginTop = 20;
-    gridLayout.marginLeft = 20;
-    gridLayout.marginRight = 20;
+    gridLayout.marginBottom = 8;
+    gridLayout.marginTop = 8;
+    gridLayout.marginLeft = 8;
+    gridLayout.marginRight = 8;
     
     shell.setLayout (gridLayout);
     shell.pack ();
     shell.open ();
     
+    shell.setSize(500, shell.getSize().y);
+    
     while (!shell.isDisposed ()) {
-      if (!display.readAndDispatch ()) display.sleep ();
+      if (!display.readAndDispatch ()) {
+    	  display.sleep ();
+      }
     }
     
-    display.dispose ();
+    if (!display.isDisposed()) {
+    	display.dispose ();
+    }
   }
 }
