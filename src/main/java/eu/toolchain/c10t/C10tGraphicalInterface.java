@@ -33,8 +33,6 @@ public class C10tGraphicalInterface {
   private Spinner top;
   private Spinner bottom;
   private Button renderbutton;
-  private Button flip;
-  private Button inverse;
   private Button cavemode;
   private Button nightmode;
   private Button limitButton;
@@ -110,14 +108,6 @@ public class C10tGraphicalInterface {
     command.add("-t");
     command.add(Integer.toString(top.getSelection()));
     
-    if (flip.getSelection()) {
-      command.add("-f");
-    }
-    
-    if (inverse.getSelection()) {
-      command.add("-r");
-    }
-    
     if (cavemode.getSelection()) {
       command.add("-c");
     }
@@ -157,16 +147,6 @@ public class C10tGraphicalInterface {
     
     shell.setLayout(gridLayout);
     shell.setText("Options");
-
-    {
-      flip = new Button(shell, SWT.CHECK);
-      flip.setText("Flip 90 degrees CCW");
-    }
-
-    {
-      inverse = new Button(shell, SWT.CHECK);
-      inverse.setText("Flip 180 degrees CCW");
-    }
 
     {
       cavemode = new Button(shell, SWT.CHECK);

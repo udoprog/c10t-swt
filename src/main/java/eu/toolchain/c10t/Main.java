@@ -45,7 +45,7 @@ public class Main {
           gui.enableRenderButton();
           gui.updateProgressBar(0);
           gui.updateProgressLabel("Failed to execute command!");
-
+          
           gui.asyncExec(new Runnable() {
             @Override
             public void run() {
