@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Scanner;
 
 public class C10tDetachedProcess implements DetachedProcess {
   private static final int RENDER_BYTE = 0x10;
@@ -25,12 +26,8 @@ public class C10tDetachedProcess implements DetachedProcess {
     }
   }
   
-  private int readPercentage(InputStream is) throws DetachedProcessException {
-    int b;
-    if ((b = read(is)) == -1) {
-      throw new DetachedProcessException("Expected percentage byte");
-    }
-    return ((b * 100) / 0xff);
+  private int convertPercentage(int perc) throws DetachedProcessException {
+    return ((perc * 100) / 0xff);
   }
   
   private String readErrorMessage(InputStream is) throws DetachedProcessException {
@@ -45,16 +42,15 @@ public class C10tDetachedProcess implements DetachedProcess {
   
   @Override
   public void run(Process p) throws DetachedProcessException {
-        InputStream is = p.getInputStream();
-        
+    InputStream is = p.getInputStream();
+    Scanner s = new Scanner(is);
+    
     int b;
       
     int stage = 0x0;
-      
-    while (true) {
-      if ((b = read(is)) == -1) {
-        break;
-      }
+    
+    while (s.hasNextInt(16)) {
+      b = s.nextInt(16);
       
       switch(b) {
       case ERROR_BYTE:
@@ -64,24 +60,36 @@ public class C10tDetachedProcess implements DetachedProcess {
           gui.updateProgressLabel("Rendering Parts...");
           stage = RENDER_BYTE;
         }
+
+        if (!s.hasNextInt(16)) {
+          throw new DetachedProcessException("Expected percentage");
+        }
         
-        gui.updateProgressBar(readPercentage(is));
+        gui.updateProgressBar(convertPercentage(s.nextInt(16)));
         break;
       case COMP_BYTE:
         if (stage != COMP_BYTE) {
           gui.updateProgressLabel("Compositioning Image...");
           stage = COMP_BYTE;
         }
+
+        if (!s.hasNextInt(16)) {
+          throw new DetachedProcessException("Expected percentage");
+        }
         
-        gui.updateProgressBar(readPercentage(is));
+        gui.updateProgressBar(convertPercentage(s.nextInt(16)));
         break;
       case IMAGE_BYTE:
         if (stage != IMAGE_BYTE) {
           gui.updateProgressLabel("Saving Image...");
           stage = IMAGE_BYTE;
         }
+
+        if (!s.hasNextInt(16)) {
+          throw new DetachedProcessException("Expected percentage");
+        }
         
-        gui.updateProgressBar(readPercentage(is));
+        gui.updateProgressBar(convertPercentage(s.nextInt(16)));
         break;
       default:
         throw new DetachedProcessException("Bad command byte: " + b);
