@@ -125,7 +125,7 @@ public class C10tGraphicalInterface {
   }
 
   private Shell setupOptionsShell() {
-    final Shell shell = new Shell(display, SWT.TITLE);
+    final Shell shell = new Shell(display, SWT.TITLE | SWT.CLOSE);
 
     shell.addListener(SWT.Close, new Listener() {
       @Override
@@ -236,7 +236,7 @@ public class C10tGraphicalInterface {
   }
   
   public Shell setupProgressShell() {
-    final Shell shell = new Shell(display, SWT.NONE);
+    final Shell shell = new Shell(display, SWT.NONE | SWT.ON_TOP);
     
     FillLayout fillLayout = new FillLayout();
     fillLayout.type = SWT.VERTICAL;
