@@ -86,7 +86,7 @@ public class C10tDetachedProcess implements DetachedProcess {
 
       switch(b) {
       case ERROR_BYTE:
-        throw new DetachedProcessException(readErrorMessage(is));
+        throw new DetachedProcessException(readErrorMessage(is), true);
       case RENDER_BYTE:
         if (stage != RENDER_BYTE) {
           gui.updateProgressLabel(PROGRESS_RENDER);

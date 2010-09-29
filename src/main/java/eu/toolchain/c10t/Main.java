@@ -36,26 +36,29 @@ public class Main {
     public void widgetSelected(SelectionEvent event) {
       DetachedProcessCallback callback = new DetachedProcessCallback() {
         @Override
-        public void onException(DetachedProcessException e) {
-          final Writer result = new StringWriter();
-          final PrintWriter printWriter = new PrintWriter(result);
-
-          e.printStackTrace(printWriter);
+        public void onException(final DetachedProcessException e) {
 
           gui.enableRenderButton();
           gui.updateProgressBar(0);
           gui.updateProgressLabel("Failed to execute command!");
           
+          final String message;
+
+          if (e.isDescriptive()) {
+            message = e.getMessage();
+          } else {
+            final Writer result = new StringWriter();
+            final PrintWriter printWriter = new PrintWriter(result);
+            e.printStackTrace(printWriter);
+            message = "Got exception while trying to execute command:\n" +
+                result.toString();
+          }
+          
           gui.asyncExec(new Runnable() {
             @Override
             public void run() {
               MessageBox messageBox = new MessageBox(shell, SWT.ERROR);
-
-              messageBox.setMessage(
-                "Got exception while trying to execute command:\n" +
-                result.toString()
-              );
-
+              messageBox.setMessage(message);
               messageBox.open();
             }
           });

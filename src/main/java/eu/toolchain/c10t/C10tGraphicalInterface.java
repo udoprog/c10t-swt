@@ -29,6 +29,8 @@ public class C10tGraphicalInterface {
   private Label progressBarLabel;
   private Button coreEnabledButton;
   private Spinner coreSpinner;
+  private Button memoryLimitEnabledButton;
+  private Spinner memoryLimitSpinner;
   //private Spinner bottom;
   private Spinner top;
   private Spinner bottom;
@@ -58,6 +60,7 @@ public class C10tGraphicalInterface {
     display.asyncExec(new Runnable() {
       public void run() {
         progressShell.setVisible(true);
+        progressShell.forceActive();
         renderbutton.setEnabled(false);
       }
     });
@@ -90,6 +93,7 @@ public class C10tGraphicalInterface {
       case 0: break;
       case 1: command.add("-q"); break;
       case 2: command.add("-y"); break;
+      case 3: command.add("-z"); break;
     }
     
     if (!StringUtils.isEmpty(worldPath.getText())) {
@@ -118,7 +122,12 @@ public class C10tGraphicalInterface {
     
     if (coreEnabledButton.getSelection()) {
     	command.add("-m");
-        command.add(Integer.toString(coreSpinner.getSelection()));
+      command.add(Integer.toString(coreSpinner.getSelection()));
+    }
+    
+    if (memoryLimitEnabledButton.getSelection()) {
+    	command.add("-M");
+      command.add(Integer.toString(memoryLimitSpinner.getSelection()));
     }
     
     return command.toArray(new String[command.size()]);
@@ -126,7 +135,7 @@ public class C10tGraphicalInterface {
 
   private Shell setupOptionsShell() {
     final Shell shell = new Shell(display, SWT.TITLE | SWT.CLOSE);
-
+    
     shell.addListener(SWT.Close, new Listener() {
       @Override
       public void handleEvent(Event event) {
@@ -231,12 +240,36 @@ public class C10tGraphicalInterface {
       comp.pack();
     }
     
+    {
+      Composite comp = new Composite(shell, SWT.NONE);
+      RowLayout rowLayout = new RowLayout();
+      rowLayout.center = true;
+      rowLayout.marginLeft = 0;
+      rowLayout.marginRight = 0;
+      rowLayout.marginTop = 0;
+      rowLayout.marginBottom = 0;
+      rowLayout.spacing = 4;
+      comp.setLayout(rowLayout);
+      
+      memoryLimitEnabledButton = new Button(comp, SWT.CHECK);
+      memoryLimitEnabledButton.setText("Memory Limit: ");
+      RowData rowData = new RowData();
+      rowData.width = 100;
+      memoryLimitEnabledButton.setLayoutData(rowData);
+      
+      memoryLimitSpinner = new Spinner(comp, SWT.BORDER);
+      memoryLimitSpinner.setMaximum(1024 * 36);
+      memoryLimitSpinner.setMinimum(32);
+      memoryLimitSpinner.setSelection(1024);
+      comp.pack();
+    }
+    
     shell.pack();
     return shell;
   }
   
   public Shell setupProgressShell() {
-    final Shell shell = new Shell(display, SWT.NONE | SWT.ON_TOP);
+    final Shell shell = new Shell(display, SWT.NONE);
     
     FillLayout fillLayout = new FillLayout();
     fillLayout.type = SWT.VERTICAL;
@@ -292,6 +325,7 @@ public class C10tGraphicalInterface {
       @Override
       public void widgetSelected(SelectionEvent selectionEvent) {
         options.setVisible(true);
+        options.forceActive();
       }
     });
 
@@ -373,6 +407,7 @@ public class C10tGraphicalInterface {
       mode.add("Normal (top-down)", 0);
       mode.add("Oblique", 1);
       mode.add("Oblique Angle", 2);
+      mode.add("Isometric", 3);
       mode.select(0);
       
       GridData modeGridData = new GridData();
