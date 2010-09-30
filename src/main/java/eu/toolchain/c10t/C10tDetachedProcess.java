@@ -15,7 +15,12 @@ public class C10tDetachedProcess implements DetachedProcess {
   private static final int IMAGE_BYTE = 0x30;
   private static final int PARSER_BYTE = 0x40;
   private static final int ERROR_BYTE = 0x01;
-  
+
+  private static String PROGRESS_INITIAL = "Prepairing to render Image...";
+  private static String PROGRESS_RENDER = "Rendering image...";
+  private static String PROGRESS_COMP = "Compositioning image...";
+  private static String PROGRESS_IMAGE = "Saving image...";
+
   private C10tGraphicalInterface gui;
   private Hex hex;
   
@@ -48,7 +53,7 @@ public class C10tDetachedProcess implements DetachedProcess {
 
   public int nextByte(InputStream is) throws DetachedProcessException {
       byte bytes[] = new byte[2];
-      
+
       try {
         is.read(bytes, 0, 2);
       } catch(IOException e) {
@@ -71,8 +76,11 @@ public class C10tDetachedProcess implements DetachedProcess {
 
   @Override
   public void run(Process p) throws DetachedProcessException {
+    gui.updateProgressLabel(PROGRESS_INITIAL);
+    gui.updateProgressBar(0);
+
     InputStream is = p.getInputStream();
-    
+
     int stage = 0x0;
     int render_perc = 0;
     
@@ -87,7 +95,7 @@ public class C10tDetachedProcess implements DetachedProcess {
       case PARSER_BYTE:
         if (stage != PARSER_BYTE) {
           gui.updateProgressLabel("Performing broad phase scan...");
-          stage = RENDER_BYTE;
+          stage = PARSER_BYTE;
         }
         
         if ((b = nextByte(is)) == -1) {
@@ -100,7 +108,7 @@ public class C10tDetachedProcess implements DetachedProcess {
         break;
       case COMP_BYTE:
         if (stage != COMP_BYTE) {
-          gui.updateProgressLabel("Compositioning Image...");
+          gui.updateProgressLabel(PROGRESS_COMP);
           stage = COMP_BYTE;
         }
 
@@ -112,7 +120,7 @@ public class C10tDetachedProcess implements DetachedProcess {
         break;
       case IMAGE_BYTE:
         if (stage != IMAGE_BYTE) {
-          gui.updateProgressLabel("Saving Image...");
+          gui.updateProgressLabel(PROGRESS_IMAGE);
           stage = IMAGE_BYTE;
         }
 

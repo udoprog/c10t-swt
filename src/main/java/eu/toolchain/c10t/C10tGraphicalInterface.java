@@ -1,6 +1,7 @@
 package eu.toolchain.c10t;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -19,7 +20,9 @@ import org.eclipse.swt.widgets.*;
 
 public class C10tGraphicalInterface {
   public static final String INITIAL_PROGRESS_LABEL = "Prepairing to render image...";
-  
+  public static final String EXCLUDE_BLOCKS = "Exclude Blocks";
+  public static final String INCLUDE_BLOCKS = "Include Blocks";
+
   private Display display;
   private Shell progressShell;
   private Text worldPath;
@@ -29,13 +32,17 @@ public class C10tGraphicalInterface {
   private Label progressBarLabel;
   private Button coreEnabledButton;
   private Spinner coreSpinner;
+  private Button memoryLimitEnabledButton;
+  private Spinner memoryLimitSpinner;
   //private Spinner bottom;
   private Spinner top;
   private Spinner bottom;
   private Button renderbutton;
   private Button cavemode;
   private Button nightmode;
+  private Button hideall;
   private Button limitButton;
+  private org.eclipse.swt.widgets.List excludeIncludeList;
   
   public void addRenderButtonListener(SelectionListener listener) {
     renderbutton.addSelectionListener(listener);
@@ -58,6 +65,7 @@ public class C10tGraphicalInterface {
     display.asyncExec(new Runnable() {
       public void run() {
         progressShell.setVisible(true);
+        progressShell.forceActive();
         renderbutton.setEnabled(false);
       }
     });
@@ -90,6 +98,7 @@ public class C10tGraphicalInterface {
       case 0: break;
       case 1: command.add("-q"); break;
       case 2: command.add("-y"); break;
+      case 3: command.add("-z"); break;
     }
     
     if (!StringUtils.isEmpty(worldPath.getText())) {
@@ -115,49 +124,35 @@ public class C10tGraphicalInterface {
     if (nightmode.getSelection()) {
       command.add("-n");
     }
+
+    if (hideall.getSelection()) {
+      command.add("-a");
+
+      for (int index : excludeIncludeList.getSelectionIndices()) {
+        command.add("-i");
+        command.add(Integer.toString(index));
+      }
+    } else {
+      for (int index : excludeIncludeList.getSelectionIndices()) {
+        command.add("-e");
+        command.add(Integer.toString(index));
+      }
+    }
     
     if (coreEnabledButton.getSelection()) {
     	command.add("-m");
-        command.add(Integer.toString(coreSpinner.getSelection()));
+      command.add(Integer.toString(coreSpinner.getSelection()));
+    }
+    
+    if (memoryLimitEnabledButton.getSelection()) {
+    	command.add("-M");
+      command.add(Integer.toString(memoryLimitSpinner.getSelection()));
     }
     
     return command.toArray(new String[command.size()]);
   }
 
-  private Shell setupOptionsShell() {
-    final Shell shell = new Shell(display, SWT.TITLE);
-
-    shell.addListener(SWT.Close, new Listener() {
-      @Override
-      public void handleEvent(Event event) {
-        event.doit = false;
-        shell.setVisible(false);
-      }
-    });
-
-    shell.setVisible(false);
-    GridLayout gridLayout = new GridLayout();
-    gridLayout.marginTop = 8;
-    gridLayout.marginBottom = 8;
-    gridLayout.marginLeft = 8;
-    gridLayout.marginRight = 8;
-    gridLayout.verticalSpacing = 0;
-    gridLayout.verticalSpacing = 4;
-    gridLayout.makeColumnsEqualWidth = true;
-    
-    shell.setLayout(gridLayout);
-    shell.setText("Options");
-
-    {
-      cavemode = new Button(shell, SWT.CHECK);
-      cavemode.setText("Cave-mode");
-    }
-    
-    {
-      nightmode = new Button(shell, SWT.CHECK);
-      nightmode.setText("Night-mode");
-    }
-    
+  private void setupGeneralOptions(Composite shell) {
     {
       Composite comp = new Composite(shell, SWT.NONE);
       RowLayout rowLayout = new RowLayout();
@@ -168,20 +163,20 @@ public class C10tGraphicalInterface {
       rowLayout.marginBottom = 0;
       rowLayout.spacing = 4;
       comp.setLayout(rowLayout);
-      
+
       coreEnabledButton = new Button(comp, SWT.CHECK);
       coreEnabledButton.setText("Threads: ");
       RowData rowData = new RowData();
       rowData.width = 100;
       coreEnabledButton.setLayoutData(rowData);
-      
+
       coreSpinner = new Spinner(comp, SWT.BORDER);
       coreSpinner.setMaximum(24);
       coreSpinner.setMinimum(1);
       coreSpinner.setSelection(1);
       comp.pack();
     }
-    
+
     {
       Composite comp = new Composite(shell, SWT.NONE);
       RowLayout rowLayout = new RowLayout();
@@ -192,14 +187,14 @@ public class C10tGraphicalInterface {
       rowLayout.marginBottom = 0;
       rowLayout.spacing = 4;
       comp.setLayout(rowLayout);
-      
+
       limitButton = new Button(comp, SWT.CHECK);
       limitButton.setText("Limits: ");
-      
+
       RowData rowData = new RowData();
       rowData.width = 100;
       limitButton.setLayoutData(rowData);
-      
+
       bottom = new Spinner(comp, SWT.BORDER);
       bottom.setIncrement(1);
       bottom.addSelectionListener(new SelectionAdapter() {
@@ -209,12 +204,12 @@ public class C10tGraphicalInterface {
           }
         }
       });
-        
+
       bottom.setMinimum(0);
       bottom.setMaximum(0x7f);
 
       new Label(comp, SWT.NONE).setText("-");
-      
+
       top = new Spinner(comp, SWT.BORDER);
       top.setIncrement(1);
       top.addSelectionListener(new SelectionAdapter() {
@@ -227,23 +222,86 @@ public class C10tGraphicalInterface {
       top.setMinimum(0);
       top.setMaximum(0x7f);
       top.setSelection(0x7f);
-      
+
       comp.pack();
     }
-    
-    shell.pack();
-    return shell;
+
+    {
+      Composite comp = new Composite(shell, SWT.NONE);
+      RowLayout rowLayout = new RowLayout();
+      rowLayout.center = true;
+      rowLayout.marginLeft = 0;
+      rowLayout.marginRight = 0;
+      rowLayout.marginTop = 0;
+      rowLayout.marginBottom = 0;
+      rowLayout.spacing = 4;
+      comp.setLayout(rowLayout);
+
+      memoryLimitEnabledButton = new Button(comp, SWT.CHECK);
+      memoryLimitEnabledButton.setText("Memory Limit: ");
+      RowData rowData = new RowData();
+      rowData.width = 100;
+      memoryLimitEnabledButton.setLayoutData(rowData);
+
+      memoryLimitSpinner = new Spinner(comp, SWT.BORDER);
+      memoryLimitSpinner.setMaximum(1024 * 36);
+      memoryLimitSpinner.setMinimum(32);
+      memoryLimitSpinner.setSelection(1024);
+      comp.pack();
+    }
   }
-  
-  public Shell setupProgressShell() {
-    final Shell shell = new Shell(display, SWT.NONE);
-    
-    FillLayout fillLayout = new FillLayout();
-    fillLayout.type = SWT.VERTICAL;
-    fillLayout.marginHeight = 10;
-    fillLayout.marginWidth = 10;
-    shell.setLayout(fillLayout);
-    
+
+  private void setupRenderingOptions(Composite shell) {
+    {
+      cavemode = new Button(shell, SWT.CHECK);
+      cavemode.setText("Cave mode");
+    }
+
+    {
+      nightmode = new Button(shell, SWT.CHECK);
+      nightmode.setText("Night mode");
+    }
+
+    final Label includeExcludeLabel = new Label(shell, SWT.NONE);
+
+    includeExcludeLabel.setText(EXCLUDE_BLOCKS);
+
+    {
+      excludeIncludeList = new org.eclipse.swt.widgets.List(shell, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL);
+      GridData gridData = new GridData();
+      gridData.heightHint = 160;
+      gridData.verticalAlignment = SWT.FILL;
+      excludeIncludeList.setLayoutData(gridData);
+
+      for (Material m : EnumSet.allOf(Material.class)) {
+        excludeIncludeList.add("");
+      }
+
+      for (Material m : EnumSet.allOf(Material.class)) {
+        excludeIncludeList.setItem(m.getCode(), m.name());
+      }
+    }
+
+    {
+      hideall = new Button(shell, SWT.CHECK);
+      hideall.setText("Hide all");
+
+      hideall.addSelectionListener(new SelectionAdapter(){
+        @Override
+        public void widgetSelected(SelectionEvent selectionEvent) {
+          if (hideall.getSelection()) {
+            includeExcludeLabel.setText(INCLUDE_BLOCKS);
+          } else {
+            includeExcludeLabel.setText(EXCLUDE_BLOCKS);
+          }
+        }
+      });
+    }
+  }
+
+  private Shell setupOptionsShell() {
+    final Shell shell = new Shell(display, SWT.TITLE | SWT.CLOSE);
+
     shell.addListener(SWT.Close, new Listener() {
       @Override
       public void handleEvent(Event event) {
@@ -253,18 +311,102 @@ public class C10tGraphicalInterface {
     });
 
     shell.setVisible(false);
-    
+
+    GridLayout shellLayout = new GridLayout();
+    shellLayout.marginTop = 8;
+    shellLayout.marginBottom = 8;
+    shellLayout.marginLeft = 8;
+    shellLayout.marginRight = 8;
+    shellLayout.horizontalSpacing = 8;
+    shellLayout.verticalSpacing = 8;
+    shellLayout.makeColumnsEqualWidth = true;
+    shellLayout.numColumns = 2;
+
+    GridLayout gridLayout = new GridLayout();
+    gridLayout.marginTop = 4;
+    gridLayout.marginBottom = 4;
+    gridLayout.marginLeft = 4;
+    gridLayout.marginRight = 4;
+    gridLayout.verticalSpacing = 0;
+    gridLayout.verticalSpacing = 4;
+    gridLayout.makeColumnsEqualWidth = true;
+
+    shell.setLayout(shellLayout);
+    shell.setText("Options");
+
+    Group general = new Group(shell, SWT.SHADOW_ETCHED_IN);
+
+    {
+      GridData gridData = new GridData();
+      gridData.horizontalAlignment = SWT.FILL;
+      gridData.verticalAlignment = SWT.FILL;
+      general.setLayout(gridLayout);
+      general.setLayoutData(gridData);
+      general.setText("General Options");
+    }
+
+    Group rendering = new Group(shell, SWT.SHADOW_ETCHED_IN);
+
+    {
+      GridData gridData = new GridData();
+      gridData.horizontalAlignment = SWT.FILL;
+      gridData.verticalAlignment = SWT.FILL;
+      rendering.setLayout(gridLayout);
+      rendering.setLayoutData(gridData);
+      rendering.setText("Rendering Options");
+    }
+
+    setupGeneralOptions(general);
+    setupRenderingOptions(rendering);
+
+    {
+      Button apply = new Button(shell, SWT.PUSH);
+      apply.setText("Apply");
+
+      apply.addSelectionListener(new SelectionAdapter() {
+        @Override
+        public void widgetSelected(SelectionEvent selectionEvent) {
+          shell.setVisible(false);
+        }
+      });
+    }
+
+    general.pack();
+    rendering.pack();
+    shell.pack();
+    return shell;
+  }
+
+  public Shell setupProgressShell() {
+    final Shell shell = new Shell(display, SWT.NONE);
+
+    FillLayout fillLayout = new FillLayout();
+    fillLayout.type = SWT.VERTICAL;
+    fillLayout.marginHeight = 10;
+    fillLayout.marginWidth = 10;
+    shell.setLayout(fillLayout);
+
+    shell.addListener(SWT.Close, new Listener() {
+      @Override
+      public void handleEvent(Event event) {
+        event.doit = false;
+        shell.setVisible(false);
+      }
+    });
+
+    shell.setVisible(false);
+
     {
       progressBarLabel = new Label(shell, SWT.NONE);
       progressBarLabel.setText(INITIAL_PROGRESS_LABEL);
     }
-      
+
     {
       progressBar = new ProgressBar(shell, SWT.NONE);
     }
-    
+
     shell.pack();
-    
+
     Point p = shell.getSize();
     shell.setSize(300, p.y);
     Rectangle r = display.getClientArea();
@@ -292,6 +434,7 @@ public class C10tGraphicalInterface {
       @Override
       public void widgetSelected(SelectionEvent selectionEvent) {
         options.setVisible(true);
+        options.forceActive();
       }
     });
 
@@ -354,13 +497,23 @@ public class C10tGraphicalInterface {
 
         final FileDialog fileDialog = new FileDialog(shell, SWT.SAVE);
 
+        String[] filterExt = { "*.png" };
+        fileDialog.setFilterExtensions(filterExt);
+
         setOutputFile.addSelectionListener(new SelectionAdapter() {
           public void widgetSelected(SelectionEvent arg0) {
             String path = fileDialog.open();
 
-            if (path != null) {
-              outputFile.setText(path);
+            if (StringUtils.isEmpty(path)) {
+              return;
             }
+
+            if (!path.toUpperCase().endsWith(".PNG")) {
+              path += ".png";
+            }
+
+            fileDialog.setFileName(path);
+            outputFile.setText(path);
           }
         });
       }
@@ -373,6 +526,7 @@ public class C10tGraphicalInterface {
       mode.add("Normal (top-down)", 0);
       mode.add("Oblique", 1);
       mode.add("Oblique Angle", 2);
+      mode.add("Isometric", 3);
       mode.select(0);
       
       GridData modeGridData = new GridData();
