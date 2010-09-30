@@ -101,15 +101,17 @@ public class C10tDetachedProcess implements DetachedProcess {
         if ((b = nextByte(is)) == -1) {
           throw new DetachedProcessException("Expected byte");
         }
-        
-        render_perc += 1;
-        if (render_perc > 100) render_perc = 0;
-        gui.updateProgressBar(render_perc);
+
+        if (b == 1) {
+            render_perc += 1;
+            if (render_perc > 100) render_perc = 0;
+            gui.updateProgressBar(render_perc);
+        }
         break;
-      case COMP_BYTE:
-        if (stage != COMP_BYTE) {
-          gui.updateProgressLabel(PROGRESS_COMP);
-          stage = COMP_BYTE;
+      case RENDER_BYTE:
+        if (stage != RENDER_BYTE) {
+          gui.updateProgressLabel(PROGRESS_RENDER);
+          stage = RENDER_BYTE;
         }
 
         if ((b = nextByte(is)) == -1) {

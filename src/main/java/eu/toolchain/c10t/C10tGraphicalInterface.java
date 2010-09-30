@@ -1,5 +1,6 @@
 package eu.toolchain.c10t;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -86,7 +87,10 @@ public class C10tGraphicalInterface {
       }
     });
   }
-  
+
+  private String getDefaultOutputFile() {
+      return new File(System.getProperty("user.dir"), "out.png").getAbsolutePath();
+  }
   
   public String[] buildArguments() throws CommandNotFoundException {
     List<String> command = new ArrayList<String>();
@@ -106,10 +110,12 @@ public class C10tGraphicalInterface {
       command.add(worldPath.getText());
     }
     
-    if (!StringUtils.isEmpty(outputFile.getText())) {
-      command.add("-o");
-      command.add(outputFile.getText());
+    if (StringUtils.isEmpty(outputFile.getText())) {
+        outputFile.setText(getDefaultOutputFile());
     }
+
+    command.add("-o");
+    command.add(outputFile.getText());
 
     command.add("-b");
     command.add(Integer.toString(bottom.getSelection()));
@@ -490,6 +496,7 @@ public class C10tGraphicalInterface {
 
         outputFile = new Text(shell, SWT.SINGLE | SWT.BORDER);
         outputFile.setLayoutData(inputGridData);
+        outputFile.setText(getDefaultOutputFile());
 
         final Button setOutputFile = new Button(shell, SWT.PUSH);
         setOutputFile.setText("Set output file...");
