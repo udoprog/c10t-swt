@@ -13,6 +13,7 @@ public class C10tDetachedProcess implements DetachedProcess {
   private static final int RENDER_BYTE = 0x10;
   private static final int COMP_BYTE = 0x20;
   private static final int IMAGE_BYTE = 0x30;
+  private static final int PARSER_BYTE = 0x40;
   private static final int ERROR_BYTE = 0x01;
   
   private C10tGraphicalInterface gui;
@@ -54,6 +55,9 @@ public class C10tDetachedProcess implements DetachedProcess {
         return -1;
       }
 
+      System.out.println(bytes[0]);
+      System.out.println(bytes[1]);
+
       byte result[];
 
       try {
@@ -70,6 +74,7 @@ public class C10tDetachedProcess implements DetachedProcess {
     InputStream is = p.getInputStream();
     
     int stage = 0x0;
+    int render_perc = 0;
     
     while (true) {
       int b = nextByte(is);
@@ -79,17 +84,19 @@ public class C10tDetachedProcess implements DetachedProcess {
       switch(b) {
       case ERROR_BYTE:
         throw new DetachedProcessException(readErrorMessage(is));
-      case RENDER_BYTE:
-        if (stage != RENDER_BYTE) {
-          gui.updateProgressLabel("Rendering Parts...");
+      case PARSER_BYTE:
+        if (stage != PARSER_BYTE) {
+          gui.updateProgressLabel("Performing broad phase scan...");
           stage = RENDER_BYTE;
         }
-
+        
         if ((b = nextByte(is)) == -1) {
-          throw new DetachedProcessException("Expected percentage");
+          throw new DetachedProcessException("Expected byte");
         }
         
-        gui.updateProgressBar(convertPercentage(b));
+        render_perc += 1;
+        if (render_perc > 100) render_perc = 0;
+        gui.updateProgressBar(render_perc);
         break;
       case COMP_BYTE:
         if (stage != COMP_BYTE) {
