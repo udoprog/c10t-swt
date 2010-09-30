@@ -60,9 +60,6 @@ public class C10tDetachedProcess implements DetachedProcess {
         return -1;
       }
 
-      System.out.println(bytes[0]);
-      System.out.println(bytes[1]);
-
       byte result[];
 
       try {
@@ -82,8 +79,9 @@ public class C10tDetachedProcess implements DetachedProcess {
     InputStream is = p.getInputStream();
 
     int stage = 0x0;
-    int render_perc = 0;
-    
+    int parser_perc = 0;
+    int parser_progress = 0;
+
     while (true) {
       int b = nextByte(is);
 
@@ -94,7 +92,7 @@ public class C10tDetachedProcess implements DetachedProcess {
         throw new DetachedProcessException(readErrorMessage(is));
       case PARSER_BYTE:
         if (stage != PARSER_BYTE) {
-          gui.updateProgressLabel("Performing broad phase scan...");
+          gui.updateProgressLabel("Performing broad phase scan... (" + parser_progress + "/?)");
           stage = PARSER_BYTE;
         }
         
@@ -103,9 +101,11 @@ public class C10tDetachedProcess implements DetachedProcess {
         }
 
         if (b == 1) {
-            render_perc += 1;
-            if (render_perc > 100) render_perc = 0;
-            gui.updateProgressBar(render_perc);
+            parser_progress += 1000;
+            gui.updateProgressLabel("Performing broad phase scan... (" + parser_progress + "/?)");
+            parser_perc += 1;
+            if (parser_perc > 100) parser_perc = 0;
+            gui.updateProgressBar(parser_perc);
         }
         break;
       case RENDER_BYTE:
