@@ -69,26 +69,29 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
         <swt.classifier>x86</swt.classifier>
         <os>macosx-cocoa</os>
       </properties>
-      <!--build>
+      <build>
         <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>osxappbundle-maven-plugin</artifactId>
-                <configuration>
-                    <mainClass>com.example.Main</mainClass>
-                    <vmOptions></vmOptions>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>bundle</goal>
-                        </goals>
-                    </execution>
-               </executions>
-           </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>osxappbundle-maven-plugin</artifactId>
+        <configuration>
+          <mainClass>eu.toolchain.c10t.Main</mainClass>
+          <jvmVersion>1.6+</jvmVersion>
+          <startOnFirstThread>true</startOnFirstThread>
+          <internetEnable>true</internetEnable>
+          <javaApplicationStub>src/assembly/macosx/JavaApplicationStub</javaApplicationStub>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>bundle</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
        </plugins>
-      </build-->
+      </build>
     </profile>
     <profile>
       <id>macosx-cocoa-64</id>
