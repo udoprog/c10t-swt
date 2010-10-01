@@ -15,8 +15,7 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 
 public class Main {
-  public static final String TITLE = "c10t Graphical Interface";
-  public static final String NAME = "c10t";
+  public static final String TITLE = "c10t - Graphical Interface";
   
   public static class RenderSelection extends SelectionAdapter {
     private final Shell shell;
@@ -87,13 +86,21 @@ public class Main {
       } catch (CommandNotFoundException e) {
         StringBuffer stringBuffer = new StringBuffer();
         
-        stringBuffer.append("Could not find command to execute in path:\n");
+        stringBuffer.append("Could not find any of the following commands:\n");
         
         for (File f : commandExecutioner.getPaths()) {
           stringBuffer.append("  " + f.getAbsolutePath() + "\n");
         }
 
+        stringBuffer.append("\n");
+        
+        stringBuffer.append("You must be fixed this by doing one of the following:\n\n" +
+                " 1) Install the command `" + commandExecutioner.getName() + "' to somewhere in your PATH or the working directory of this program `" + System.getProperty("user.dir") + "'\n" +
+                " 2) Specify where the command is with the environment variable `C10T_PATH'\n\n" +
+                "Your PATH is: " + System.getenv("PATH"));
+
         MessageBox messageBox = new MessageBox(shell, SWT.ERROR);
+        messageBox.setText("c10t - Failed to execute command");
         messageBox.setMessage(stringBuffer.toString());
         messageBox.open();
         gui.enableRenderButton();
@@ -103,12 +110,14 @@ public class Main {
   
   public static void main (String [] args) {
     Display display = Display.getDefault();
-    final Shell shell = new Shell(display);
+    final Shell shell = new Shell(display, SWT.TITLE | SWT.CLOSE);
     shell.setText(TITLE);
-    
+
+    final String C10T_PATH = System.getenv("C10T_PATH");
+
     final C10tGraphicalInterface gui = new C10tGraphicalInterface(display, shell);
     final DetachedProcess detachedProcess = new C10tDetachedProcess(gui);
-    final CommandExecutioner executioner = new CommandExecutioner("c10t", detachedProcess);
+    final CommandExecutioner executioner = new CommandExecutioner("c10t", detachedProcess, C10T_PATH);
     
     gui.addRenderButtonListener(new RenderSelection(shell, gui, executioner));
     
@@ -125,6 +134,19 @@ public class Main {
     
     shell.setSize(500, shell.getSize().y);
     
+    try {
+        executioner.findCommand();
+    } catch(CommandNotFoundException e) {
+        MessageBox messageBox = new MessageBox(shell, SWT.ERROR);
+        messageBox.setText("c10t - Command could not be found");
+        messageBox.setMessage("The program `" + executioner.getName() + "' could not be located anywhere in your PATH or in the current working directory\n\n" +
+                "You must be fixed this by doing one of the following:\n\n" +
+                " 1) Install the command `" + executioner.getName() + "' to somewhere in your PATH or the working directory of this program `" + System.getProperty("user.dir") + "'\n" +
+                " 2) Specify where the command is with the environment variable `C10T_PATH'\n\n" +
+                "Your PATH is: " + System.getenv("PATH"));
+        messageBox.open();
+    }
+
     while (!shell.isDisposed ()) {
       if (!display.readAndDispatch ()) {
     	  display.sleep ();

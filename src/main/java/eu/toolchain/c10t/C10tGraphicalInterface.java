@@ -7,9 +7,9 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.events.*;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
@@ -338,7 +338,7 @@ public class C10tGraphicalInterface {
     gridLayout.makeColumnsEqualWidth = true;
 
     shell.setLayout(shellLayout);
-    shell.setText("Options");
+    shell.setText("c10t - Options");
 
     Group general = new Group(shell, SWT.SHADOW_ETCHED_IN);
 
@@ -457,6 +457,37 @@ public class C10tGraphicalInterface {
 
     shell.setMenuBar(menuBar);
 
+    {
+      final ImageData logoImagedata = new ImageData(getClass().getResourceAsStream("/logo.png"));
+      Canvas canvas = new Canvas(shell, SWT.NONE);
+
+      GridData logoGridData = new GridData();
+      logoGridData.horizontalAlignment = GridData.CENTER;
+      logoGridData.verticalAlignment = GridData.FILL;
+      logoGridData.horizontalSpan = 3;
+      logoGridData.heightHint = 68;
+      logoGridData.widthHint = 200;
+      
+      canvas.setLayoutData(logoGridData);
+
+      canvas.addPaintListener(new PaintListener() {
+        public void paintControl(PaintEvent e) {
+          Image image = null;
+          try {
+            image = new Image(display, logoImagedata);
+
+          } catch (Exception e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+          }
+
+          e.gc.drawImage(image, 0, 0);
+
+          image.dispose();
+        }
+      });
+    }
+
     // World input path
     {
       GridData inputGridData = new GridData();
@@ -541,53 +572,6 @@ public class C10tGraphicalInterface {
       modeGridData.horizontalSpan = 2;
       mode.setLayoutData(modeGridData);
     }
-    
-   /* {
-      new Label(shell, SWT.NONE).setText("Options: ");
-      
-      flip = new Button(shell, SWT.CHECK);
-      flip.setText("Flip 90 degrees CCW");
-      flip.setLayoutData(fill2);
-    }
-    
-    {
-      new Label(shell, SWT.NONE);
-      
-      inverse = new Button(shell, SWT.CHECK);
-      inverse.setText("Flip 180 degrees CCW");
-      inverse.setLayoutData(fill2);
-    }
-    
-    {
-      new Label(shell, SWT.NONE);
-      
-      cavemode = new Button(shell, SWT.CHECK);
-      cavemode.setText("Cave-mode");
-      cavemode.setLayoutData(fill2);
-    }
-    
-    {
-      new Label(shell, SWT.NONE);
-      
-      nightmode = new Button(shell, SWT.CHECK);
-      nightmode.setText("Night-mode");
-      nightmode.setLayoutData(fill2);
-    }
-    
-    {
-		
-    }
-    
-    {
-      Label expander = new Label(shell, SWT.NONE);
-      expander.setLayoutData(expand3);
-    }
-    
-
-    
-
-    
-    */
 
     {
       new Label(shell, SWT.NONE);

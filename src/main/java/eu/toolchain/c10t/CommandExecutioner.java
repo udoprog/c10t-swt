@@ -15,24 +15,29 @@ public class CommandExecutioner {
   
   private DetachedProcess detachedProcess;
   
-  public CommandExecutioner(String name, DetachedProcess detachedProcess) {
+  public CommandExecutioner(String name, DetachedProcess detachedProcess, String abs_path) {
     this.detachedProcess = detachedProcess;
     
     paths = new ArrayList<File>();
-    
+
     String platform = SWT.getPlatform();
-    
-    String PATH = System.getenv("PATH");
     String delimiter = ":";
-    
+
     if (platform.equals("win32")) {
       name += ".exe";
       delimiter = ";";
     }
-    
+
     setName(name);
+
+    if (!StringUtils.isEmpty(abs_path)) {
+      paths.add(new File(abs_path));
+      return;
+    }
+
+    String PATH = System.getenv("PATH");
     
-    paths.add(new File(".", name));
+    paths.add(new File(System.getProperty("user.dir"), name));
     
     if (!StringUtils.isEmpty(PATH)) {
       for (String  p : PATH.split(delimiter)) {
@@ -77,6 +82,10 @@ public class CommandExecutioner {
     }
     
     throw new CommandNotFoundException("Could not find command '" + name + "' as any of the following: " + absPaths);
+  }
+
+  public void insertCommand(File file) {
+    paths.add(0, file);    
   }
   
   public Process getProcess(String ... argv) throws CommandNotFoundException {
