@@ -41,6 +41,7 @@ public class C10tGraphicalInterface {
   private Button renderbutton;
   private Button cavemode;
   private Button nightmode;
+  private Button heightmap;
   private Button hideall;
   private Button limitButton;
   private org.eclipse.swt.widgets.List excludeIncludeList;
@@ -129,6 +130,10 @@ public class C10tGraphicalInterface {
     
     if (nightmode.getSelection()) {
       command.add("-n");
+    }
+    
+    if (heightmap.getSelection()) {
+      command.add("--heightmap");
     }
 
     if (hideall.getSelection()) {
@@ -266,6 +271,11 @@ public class C10tGraphicalInterface {
     {
       nightmode = new Button(shell, SWT.CHECK);
       nightmode.setText("Night mode");
+    }
+    
+    {
+      heightmap = new Button(shell, SWT.CHECK);
+      heightmap.setText("Height map");
     }
 
     final Label includeExcludeLabel = new Label(shell, SWT.NONE);
