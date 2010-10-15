@@ -14,6 +14,7 @@ public class C10tDetachedProcess implements DetachedProcess {
   private static final int COMP_BYTE = 0x20;
   private static final int IMAGE_BYTE = 0x30;
   private static final int PARSER_BYTE = 0x40;
+  private static final int END_BYTE = 0xF0;
   private static final int ERROR_BYTE = 0x01;
 
   private static String PROGRESS_INITIAL = "Prepairing to render Image...";
@@ -23,10 +24,16 @@ public class C10tDetachedProcess implements DetachedProcess {
 
   private C10tGraphicalInterface gui;
   private Hex hex;
+  private StringBuffer output;
   
   public C10tDetachedProcess(C10tGraphicalInterface gui) {
     this.gui = gui;
     this.hex = new Hex();
+    this.output = new StringBuffer();
+  }
+  
+  public String getOutput() {
+    return output.toString();
   }
   
   private int read(InputStream is) throws DetachedProcessException {
@@ -45,10 +52,12 @@ public class C10tDetachedProcess implements DetachedProcess {
       BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(is));
       
       try {
-      return bufferedReader.readLine();
-    } catch (IOException e) {
-      throw new DetachedProcessException(e);
-    }
+        String error = bufferedReader.readLine();
+        output.append(error);
+        return error;
+      } catch (IOException e) {
+        throw new DetachedProcessException(e);
+      }
   }
 
   public int nextByte(InputStream is) throws DetachedProcessException {
@@ -57,15 +66,18 @@ public class C10tDetachedProcess implements DetachedProcess {
       try {
         is.read(bytes, 0, 2);
       } catch(IOException e) {
-        return -1;
+        throw new DetachedProcessException("Too few characters to read byte", e);
       }
-
+      
+      output.append((char)bytes[0]);
+      output.append((char)bytes[1]);
+      
       byte result[];
 
       try {
           result = hex.decode(bytes);
       } catch(DecoderException e) {
-          return -1;
+          throw new DetachedProcessException("Could not decode byte", e);
       }
 
       return (result[0] & 0xff);
@@ -83,28 +95,29 @@ public class C10tDetachedProcess implements DetachedProcess {
     int parser_progress = 0;
 
     while (true) {
-      int b = nextByte(is);
-
-      if (b == -1) { break; }
-
-      switch(b) {
+      int type = nextByte(is);
+      
+      if (type == END_BYTE) {
+        break;
+      }
+      
+      switch(type) {
       case ERROR_BYTE:
-        throw new DetachedProcessException(readErrorMessage(is));
+        String error = readErrorMessage(is);
+        System.out.println("ERROR: " + error);
+        System.out.println("Whole output following:");
+        System.out.print(output.toString());
+        throw new DetachedProcessException(error.substring(0, 255));
       case PARSER_BYTE:
         if (stage != PARSER_BYTE) {
           gui.updateProgressLabel("Performing broad phase scan... (" + parser_progress + "/?)");
           stage = PARSER_BYTE;
         }
         
-        if ((b = nextByte(is)) == -1) {
-          throw new DetachedProcessException("Expected byte");
-        }
-
-        if (b == 1) {
+        if (nextByte(is) == 1) {
             parser_progress += 1000;
             gui.updateProgressLabel("Performing broad phase scan... (" + parser_progress + "/?)");
-            parser_perc += 1;
-            if (parser_perc > 100) parser_perc = 0;
+            if (++parser_perc > 100) parser_perc = 0;
             gui.updateProgressBar(parser_perc);
         }
         break;
@@ -113,27 +126,19 @@ public class C10tDetachedProcess implements DetachedProcess {
           gui.updateProgressLabel(PROGRESS_RENDER);
           stage = RENDER_BYTE;
         }
-
-        if ((b = nextByte(is)) == -1) {
-          throw new DetachedProcessException("Expected percentage");
-        }
         
-        gui.updateProgressBar(convertPercentage(b));
+        gui.updateProgressBar(convertPercentage(nextByte(is)));
         break;
       case IMAGE_BYTE:
         if (stage != IMAGE_BYTE) {
           gui.updateProgressLabel(PROGRESS_IMAGE);
           stage = IMAGE_BYTE;
         }
-
-        if ((b = nextByte(is)) == -1) {
-          throw new DetachedProcessException("Expected percentage");
-        }
         
-        gui.updateProgressBar(convertPercentage(b));
+        gui.updateProgressBar(convertPercentage(nextByte(is)));
         break;
       default:
-        throw new DetachedProcessException("Bad command byte: " + b);
+        throw new DetachedProcessException("Bad command byte: " + type);
       }
     }
     
