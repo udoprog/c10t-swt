@@ -1,0 +1,23 @@
+#!/bin/bash
+
+JAVA=java
+JAVA_OPTS="$JAVA_OPTS"
+
+check_java() {
+  if ! $1 -version &> /dev/null; then
+    return 1;
+  fi
+
+  return 0;
+}
+
+if [[ ! -z $JAVA_HOME ]]; then
+  JAVA=$JAVA_HOME/bin/java
+fi
+
+if ! check_java $JAVA; then
+  echo "Cannot find java: $JAVA";
+  exit 1
+fi
+
+$JAVA $JAVA_OPTS -jar ./c10t-swt.jar
